@@ -23,6 +23,9 @@ type Directory struct {
 }
 
 func (directory *Directory) AddChild(name string) (*Directory, error) {
+	if strings.Contains(name, ".") {
+		return nil, fmt.Errorf("Directory names cannot include fullstops (.)")
+	}
 
 	for _, child := range directory.children {
 		if child.name == name {
@@ -103,5 +106,5 @@ func setup_file_system(user string) *Directory {
 }
 
 func parse_file_path(path string) []string {
-	return strings.Split(path, "/")
+	return strings.Split(strings.TrimRight(path, "/"), "/")
 }
