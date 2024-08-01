@@ -2,29 +2,37 @@ package main
 
 import "fmt"
 
-func command_cd(args []string, active_directory **Directory) {
-	if len(args) != 1 {
+func command_cd(command Command, active_directory **Directory) {
+	if len(command.args) != 1 {
 		fmt.Println("Error, must specify a single directory")
 		return
 	}
 
-	target := args[0]
+	path := parse_file_path(command.args[0])
 
-	if target == ".." {
-		if (*active_directory).parent == nil {
-			fmt.Println("Error, no parent directory")
+	for _, target := range path {
+
+		if target == ".." {
+			if (*active_directory).parent == nil {
+				fmt.Println("Error, no parent directory")
+				return
+			}
+			*active_directory = (*active_directory).parent
+			continue
+		}
+
+		found := false
+		for _, dir := range (*active_directory).children {
+			if dir.name == target {
+				*active_directory = dir
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			fmt.Printf("Error, directory %q not found in %s\n", target, (*active_directory).name)
 			return
 		}
-		*active_directory = (*active_directory).parent
-		return
 	}
-
-	for _, dir := range (*active_directory).children {
-		if target == dir.name {
-			*active_directory = dir
-			return
-		}
-	}
-
-	fmt.Println("Error, directory not found")
 }

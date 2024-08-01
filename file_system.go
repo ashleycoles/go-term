@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type File struct {
 	name      string
@@ -97,4 +100,8 @@ func setup_file_system(user string) *Directory {
 	docs.AddFile("test", "txt", "Hello, world!\nFoo\nBar")
 
 	return root
+}
+
+func parse_file_path(path string) []string {
+	return strings.Split(path, "/")
 }
