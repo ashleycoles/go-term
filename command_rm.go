@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 func command_rm(command Command, active_directory **Directory) {
 	if len(command.args) < 1 {
@@ -9,8 +12,15 @@ func command_rm(command Command, active_directory **Directory) {
 	}
 
 	for _, target := range command.args {
-		if err := (*active_directory).RemoveChild(target); err != nil {
-			fmt.Println(err.Error())
+		if strings.Contains(target, ".") {
+			if err := (*active_directory).RemoveFile(target); err != nil {
+				fmt.Println(err.Error())
+
+			}
+		} else {
+			if err := (*active_directory).RemoveChild(target); err != nil {
+				fmt.Println(err.Error())
+			}
 		}
 	}
 }

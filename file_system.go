@@ -76,6 +76,24 @@ func (directory *Directory) AddFile(name string, extension string, contents stri
 	return nil
 }
 
+func (directory *Directory) RemoveFile(name string) error {
+	index := -1
+
+	for i, file := range directory.files {
+		if file.FullName() == name {
+			index = i
+			break
+		}
+	}
+
+	if index == -1 {
+		return fmt.Errorf("File %q not found", name)
+	}
+
+	directory.files = append(directory.files[:index], directory.files[index+1:]...)
+	return nil
+}
+
 func (directory *Directory) GetFile(name string) (*File, error) {
 	for _, file := range directory.files {
 		if file.FullName() == name {
