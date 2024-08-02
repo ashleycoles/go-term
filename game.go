@@ -42,6 +42,9 @@ func main() {
 	}()
 
 	var inputBuider strings.Builder
+	var inputBuffer string
+	var commandHistory []string
+	historyIndex := 0
 
 	fmt.Printf("%s(%s)%s $ ", Green, active_directory.Path(), Reset)
 
@@ -59,6 +62,9 @@ func main() {
 				fmt.Printf("\r\n%s(%s)%s $ ", Green, active_directory.Path(), Reset)
 				continue
 			}
+
+			commandHistory = append(commandHistory, inputBuider.String())
+			historyIndex = len(commandHistory)
 
 			command, flags, args := parse_command(inputBuider.String())
 			inputBuider.Reset()
@@ -82,11 +88,56 @@ func main() {
 			}
 		case '\x03': // ctrl + c
 			return
+		case '\x1b':
+			next, _, err := reader.ReadRune()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "Error reading rune", err.Error())
+				continue
+			}
+
+			if next == '[' {
+				next, _, err := reader.ReadRune()
+				if err != nil {
+					fmt.Fprintln(os.Stderr, "Error reading rune", err.Error())
+					continue
+				}
+
+				switch next {
+				case 'A': // up
+					if historyIndex > 0 {
+						historyIndex--
+						inputBuffer = commandHistory[historyIndex]
+						updatePrompt(inputBuider.String(), inputBuffer, *active_directory)
+						inputBuider.Reset()
+						inputBuider.WriteString(inputBuffer)
+					}
+				case 'B': // down
+					if historyIndex < len(commandHistory)-1 {
+						historyIndex++
+						inputBuffer = commandHistory[historyIndex]
+						fmt.Printf("%s(%s)%s $ %s", Green, active_directory.Path(), Reset, inputBuffer)
+						updatePrompt(inputBuider.String(), inputBuffer, *active_directory)
+						inputBuider.Reset()
+						inputBuider.WriteString(inputBuffer)
+					} else if historyIndex == len(commandHistory)-1 {
+						historyIndex++
+						inputBuffer = ""
+						updatePrompt(inputBuider.String(), inputBuffer, *active_directory)
+						inputBuider.Reset()
+					}
+				}
+			}
 		default: // normal characters
 			inputBuider.WriteRune(r)
 			fmt.Fprint(os.Stdout, string(r))
 		}
 	}
+}
+
+func updatePrompt(oldInput, newInput string, active_directory Directory) {
+	// Move cursor to start of the line and clear the line
+
+	fmt.Print("\r" + strings.Repeat(" ", len(oldInput)+20) + "\r" + Green + "(" + active_directory.Path() + ")" + Reset + " $ " + newInput)
 }
 
 func name_input(reader *bufio.Reader) string {
