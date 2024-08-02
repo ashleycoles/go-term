@@ -1,10 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func command_cd(command Command, active_directory **Directory) {
+	fmt.Printf("\r\n")
+
 	if len(command.args) != 1 {
-		fmt.Println("Error, must specify a single directory")
+		fmt.Printf("Error, must specify a single directory\r\n")
 		return
 	}
 
@@ -14,7 +18,7 @@ func command_cd(command Command, active_directory **Directory) {
 
 		if target == ".." {
 			if (*active_directory).parent == nil {
-				fmt.Println("Error, no parent directory")
+				fmt.Printf("Error, no parent directory\r\n")
 				return
 			}
 			*active_directory = (*active_directory).parent
@@ -31,7 +35,7 @@ func command_cd(command Command, active_directory **Directory) {
 		}
 
 		if !found {
-			fmt.Printf("Error, directory %q not found in %s\n", target, (*active_directory).name)
+			fmt.Printf("Error, directory %q not found in %s\r\n", target, (*active_directory).name)
 			return
 		}
 	}

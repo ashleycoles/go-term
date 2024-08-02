@@ -12,6 +12,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"golang.org/x/term"
 )
 
 func main() {
@@ -23,10 +25,65 @@ func main() {
 
 	active_directory := file_system
 
-	for {
-		command := command_prompt(reader)
+	fd := int(os.Stdin.Fd())
+	oldState, err := term.MakeRaw(fd)
 
-		command_execute(command, &active_directory)
+	if err != nil {
+		fmt.Fprint(os.Stderr, "Error setting raw mode: ", err.Error())
+		os.Exit(1)
+	}
+
+	defer func() {
+		fmt.Fprintln(os.Stdout, "Restoring terminal mode")
+		if err := term.Restore(fd, oldState); err != nil {
+			fmt.Fprintln(os.Stderr, "Error restoring terminal mode: ", err.Error())
+		}
+		os.Stdout.Sync()
+	}()
+
+	var inputBuider strings.Builder
+	// var inputBuffer string
+
+	for {
+		r, _, err := reader.ReadRune()
+
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Error reading rune", err.Error())
+			continue
+		}
+
+		switch r {
+		case '\r', '\n': // enter
+			if inputBuider.Len() == 0 {
+				fmt.Print("\r\n")
+				continue
+			}
+
+			command, flags, args := parse_command(inputBuider.String())
+			inputBuider.Reset()
+
+			command_execute(Command{
+				command: command,
+				args:    args,
+				flags:   flags,
+			}, &active_directory)
+		case 127: // backspace
+			if inputBuider.Len() > 0 {
+				input := inputBuider.String()
+				inputBuider.Reset()
+
+				if len(input) > 1 {
+					inputBuider.WriteString(input[:len(input)-1])
+				}
+
+				fmt.Print("\b \b")
+			}
+		case '\x03': // ctrl + c
+			return
+		default: // normal characters
+			inputBuider.WriteRune(r)
+			fmt.Fprint(os.Stdout, string(r))
+		}
 	}
 }
 

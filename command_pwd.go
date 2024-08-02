@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func command_pwd(active_directory **Directory) {
-	fmt.Println((*active_directory).Path())
+	fmt.Printf("\r\n%s\r\n", (*active_directory).Path())
 }

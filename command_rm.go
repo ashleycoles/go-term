@@ -7,20 +7,22 @@ import (
 
 func command_rm(command Command, active_directory **Directory) {
 	if len(command.args) < 1 {
-		fmt.Println("rm: No file or directory specified")
+		fmt.Print("\r\nrm: No file or directory specified\r\n")
 		return
 	}
 
 	for _, target := range command.args {
 		if strings.Contains(target, ".") {
 			if err := (*active_directory).RemoveFile(target); err != nil {
-				fmt.Println(err.Error())
+				fmt.Printf("\r\n%s", err.Error())
 
 			}
 		} else {
 			if err := (*active_directory).RemoveChild(target); err != nil {
-				fmt.Println(err.Error())
+				fmt.Printf("\r\n%s", err.Error())
 			}
 		}
 	}
+
+	fmt.Printf("\r\n")
 }
