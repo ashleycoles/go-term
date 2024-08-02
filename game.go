@@ -42,7 +42,8 @@ func main() {
 	}()
 
 	var inputBuider strings.Builder
-	// var inputBuffer string
+
+	fmt.Printf("%s(%s)%s $ ", Green, active_directory.Path(), Reset)
 
 	for {
 		r, _, err := reader.ReadRune()
@@ -55,7 +56,7 @@ func main() {
 		switch r {
 		case '\r', '\n': // enter
 			if inputBuider.Len() == 0 {
-				fmt.Print("\r\n")
+				fmt.Printf("\r\n%s(%s)%s $ ", Green, active_directory.Path(), Reset)
 				continue
 			}
 
@@ -67,6 +68,7 @@ func main() {
 				args:    args,
 				flags:   flags,
 			}, &active_directory)
+			fmt.Printf("%s(%s)%s $ ", Green, active_directory.Path(), Reset)
 		case 127: // backspace
 			if inputBuider.Len() > 0 {
 				input := inputBuider.String()

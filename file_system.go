@@ -118,7 +118,7 @@ func setup_file_system(user string) *Directory {
 
 	home, _ := users.AddChild(user)
 	docs, _ := home.AddChild("Documents")
-	docs.AddFile("test", "txt", "Hello, world!\nFoo\nBar")
+	docs.AddFile("test", "txt", "Hello, world!\r\nFoo\r\nBar")
 
 	return root
 }
