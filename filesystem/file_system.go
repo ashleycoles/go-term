@@ -1,4 +1,4 @@
-package main
+package filesystem
 
 import (
 	"fmt"
@@ -6,84 +6,84 @@ import (
 )
 
 type File struct {
-	name      string
-	extension string
-	contents  string
+	Name      string
+	Extension string
+	Contents  string
 }
 
 func (file *File) FullName() string {
-	return file.name + "." + file.extension
+	return file.Name + "." + file.Extension
 }
 
 func (file *File) AppendContent(content string) {
-	file.contents += "\r\n" + content
+	file.Contents += "\r\n" + content
 }
 
 type Directory struct {
-	name     string
-	parent   *Directory
-	children []*Directory
-	files    []*File
+	Name     string
+	Parent   *Directory
+	Children []*Directory
+	Files    []*File
 }
 
 func (directory *Directory) AddChild(name string) (*Directory, error) {
 	if strings.Contains(name, ".") {
-		return nil, fmt.Errorf("Directory names cannot include fullstops (.)")
+		return nil, fmt.Errorf("directory names cannot include fullstops (.)")
 	}
 
-	for _, child := range directory.children {
-		if child.name == name {
-			return nil, fmt.Errorf("Directory %q already exists", name)
+	for _, child := range directory.Children {
+		if child.Name == name {
+			return nil, fmt.Errorf("directory %q already exists", name)
 		}
 	}
 	child := &Directory{
-		name:   name,
-		parent: directory,
+		Name:   name,
+		Parent: directory,
 	}
 
-	directory.children = append(directory.children, child)
+	directory.Children = append(directory.Children, child)
 	return child, nil
 }
 
 func (directory *Directory) RemoveChild(name string) error {
 	index := -1
 
-	for i, child := range directory.children {
-		if child.name == name {
+	for i, child := range directory.Children {
+		if child.Name == name {
 			index = i
 			break
 		}
 	}
 
 	if index == -1 {
-		return fmt.Errorf("Directory %q not found", name)
+		return fmt.Errorf("directory %q not found", name)
 	}
 
-	directory.children = append(directory.children[:index], directory.children[index+1:]...)
+	directory.Children = append(directory.Children[:index], directory.Children[index+1:]...)
 	return nil
 }
 
 func (directory *Directory) AddFile(name string, extension string, contents string) error {
-	for _, file := range directory.files {
-		if file.name == name && file.extension == extension {
+	for _, file := range directory.Files {
+		if file.Name == name && file.Extension == extension {
 			return fmt.Errorf("file %s already exists", name)
 		}
 	}
 
 	file := &File{
-		name:      name,
-		extension: extension,
-		contents:  contents,
+		Name:      name,
+		Extension: extension,
+		Contents:  contents,
 	}
 
-	directory.files = append(directory.files, file)
+	directory.Files = append(directory.Files, file)
 	return nil
 }
 
 func (directory *Directory) RemoveFile(name string) error {
 	index := -1
 
-	for i, file := range directory.files {
+	for i, file := range directory.Files {
 		if file.FullName() == name {
 			index = i
 			break
@@ -91,15 +91,15 @@ func (directory *Directory) RemoveFile(name string) error {
 	}
 
 	if index == -1 {
-		return fmt.Errorf("File %q not found", name)
+		return fmt.Errorf("file %q not found", name)
 	}
 
-	directory.files = append(directory.files[:index], directory.files[index+1:]...)
+	directory.Files = append(directory.Files[:index], directory.Files[index+1:]...)
 	return nil
 }
 
 func (directory *Directory) GetFile(name string) (*File, error) {
-	for _, file := range directory.files {
+	for _, file := range directory.Files {
 		if file.FullName() == name {
 			return file, nil
 		}
@@ -109,14 +109,14 @@ func (directory *Directory) GetFile(name string) (*File, error) {
 }
 
 func (directory *Directory) Path() string {
-	if directory.parent == nil {
-		return directory.name
+	if directory.Parent == nil {
+		return directory.Name
 	}
-	return directory.parent.Path() + "/" + directory.name
+	return directory.Parent.Path() + "/" + directory.Name
 }
 
 func (directory *Directory) FileExists(name string) bool {
-	for _, file := range directory.files {
+	for _, file := range directory.Files {
 		if name == file.FullName() {
 			return true
 		}
@@ -125,29 +125,29 @@ func (directory *Directory) FileExists(name string) bool {
 }
 
 func (directory *Directory) Traverse(path string) (*Directory, error) {
-	parsed_path := parse_file_path(path)
+	parsedPath := parseFilePath(path)
 
 	// Remove the last item if it's a file
-	last := parsed_path[len(parsed_path)-1]
+	last := parsedPath[len(parsedPath)-1]
 	if last != ".." && strings.Contains(last, ".") {
 		return nil, fmt.Errorf("not a directory: %s", last)
 	}
 
-	var temp_directory = directory
+	var tempDirectory = directory
 
-	for _, target := range parsed_path {
+	for _, target := range parsedPath {
 		if target == ".." {
-			if temp_directory.parent == nil {
-				return nil, fmt.Errorf("no parent directory: %s", temp_directory.name)
+			if tempDirectory.Parent == nil {
+				return nil, fmt.Errorf("no Parent directory: %s", tempDirectory.Name)
 			}
-			temp_directory = directory.parent
+			tempDirectory = directory.Parent
 			continue
 		}
 
 		found := false
-		for _, dir := range temp_directory.children {
-			if dir.name == target {
-				temp_directory = dir
+		for _, dir := range tempDirectory.Children {
+			if dir.Name == target {
+				tempDirectory = dir
 				found = true
 				break
 			}
@@ -158,11 +158,11 @@ func (directory *Directory) Traverse(path string) (*Directory, error) {
 		}
 	}
 
-	return temp_directory, nil
+	return tempDirectory, nil
 }
 
-func setup_file_system(user string) *Directory {
-	root := &Directory{name: "root"}
+func SetupFilesystem(user string) *Directory {
+	root := &Directory{Name: "root"}
 	users, _ := root.AddChild("users")
 	root.AddChild("etc")
 
@@ -173,6 +173,6 @@ func setup_file_system(user string) *Directory {
 	return root
 }
 
-func parse_file_path(path string) []string {
+func parseFilePath(path string) []string {
 	return strings.Split(strings.TrimRight(path, "/"), "/")
 }

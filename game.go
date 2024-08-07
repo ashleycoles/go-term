@@ -7,6 +7,9 @@ package main
 // Text editor?
 
 import (
+	"ash/text-game/commands"
+	"ash/text-game/filesystem"
+	"ash/text-game/output"
 	"bufio"
 	"fmt"
 	"os"
@@ -18,11 +21,11 @@ import (
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 
-	name := name_input(reader)
+	name := nameInput(reader)
 
-	file_system := setup_file_system(name)
+	fileSystem := filesystem.SetupFilesystem(name)
 
-	active_directory := file_system
+	activeDirectory := fileSystem
 
 	fd := int(os.Stdin.Fd())
 	oldState, err := term.MakeRaw(fd)
@@ -40,12 +43,12 @@ func main() {
 		os.Stdout.Sync()
 	}()
 
-	var inputBuider strings.Builder
+	var inputBuilder strings.Builder
 	var inputBuffer string
 	var commandHistory []string
 	historyIndex := 0
 
-	fmt.Printf("%s(%s)%s $ ", Green, active_directory.Path(), Reset)
+	fmt.Printf("%s(%s)%s $ ", output.Green, activeDirectory.Path(), output.Reset)
 
 	for {
 		r, _, err := reader.ReadRune()
@@ -57,30 +60,30 @@ func main() {
 
 		switch r {
 		case '\r', '\n': // enter
-			if inputBuider.Len() == 0 {
-				fmt.Printf("\r\n%s(%s)%s $ ", Green, active_directory.Path(), Reset)
+			if inputBuilder.Len() == 0 {
+				fmt.Printf("\r\n%s(%s)%s $ ", output.Green, activeDirectory.Path(), output.Reset)
 				continue
 			}
 
-			commandHistory = append(commandHistory, inputBuider.String())
+			commandHistory = append(commandHistory, inputBuilder.String())
 			historyIndex = len(commandHistory)
 
-			command, flags, args := parse_command(inputBuider.String())
-			inputBuider.Reset()
+			command, flags, args := commands.ParseCommand(inputBuilder.String())
+			inputBuilder.Reset()
 
-			command_execute(Command{
-				command: command,
-				args:    args,
-				flags:   flags,
-			}, &active_directory)
-			fmt.Printf("%s(%s)%s $ ", Green, active_directory.Path(), Reset)
+			commands.Execute(commands.Command{
+				Command: command,
+				Args:    args,
+				Flags:   flags,
+			}, &activeDirectory)
+			fmt.Printf("%s(%s)%s $ ", output.Green, activeDirectory.Path(), output.Reset)
 		case 127: // backspace
-			if inputBuider.Len() > 0 {
-				input := inputBuider.String()
-				inputBuider.Reset()
+			if inputBuilder.Len() > 0 {
+				input := inputBuilder.String()
+				inputBuilder.Reset()
 
 				if len(input) > 1 {
-					inputBuider.WriteString(input[:len(input)-1])
+					inputBuilder.WriteString(input[:len(input)-1])
 				}
 
 				fmt.Print("\b \b")
@@ -106,38 +109,38 @@ func main() {
 					if historyIndex > 0 {
 						historyIndex--
 						inputBuffer = commandHistory[historyIndex]
-						updatePrompt(inputBuider.String(), inputBuffer, *active_directory)
-						inputBuider.Reset()
-						inputBuider.WriteString(inputBuffer)
+						updatePrompt(inputBuilder.String(), inputBuffer, *activeDirectory)
+						inputBuilder.Reset()
+						inputBuilder.WriteString(inputBuffer)
 					}
 				case 'B': // down
 					if historyIndex < len(commandHistory)-1 {
 						historyIndex++
 						inputBuffer = commandHistory[historyIndex]
-						fmt.Printf("%s(%s)%s $ %s", Green, active_directory.Path(), Reset, inputBuffer)
-						updatePrompt(inputBuider.String(), inputBuffer, *active_directory)
-						inputBuider.Reset()
-						inputBuider.WriteString(inputBuffer)
+						fmt.Printf("%s(%s)%s $ %s", output.Green, activeDirectory.Path(), output.Reset, inputBuffer)
+						updatePrompt(inputBuilder.String(), inputBuffer, *activeDirectory)
+						inputBuilder.Reset()
+						inputBuilder.WriteString(inputBuffer)
 					} else if historyIndex == len(commandHistory)-1 {
 						historyIndex++
 						inputBuffer = ""
-						updatePrompt(inputBuider.String(), inputBuffer, *active_directory)
-						inputBuider.Reset()
+						updatePrompt(inputBuilder.String(), inputBuffer, *activeDirectory)
+						inputBuilder.Reset()
 					}
 				}
 			}
 		default: // normal characters
-			inputBuider.WriteRune(r)
+			inputBuilder.WriteRune(r)
 			fmt.Print(string(r))
 		}
 	}
 }
 
-func updatePrompt(oldInput, newInput string, active_directory Directory) {
-	fmt.Print("\r" + strings.Repeat(" ", len(oldInput)+20) + "\r" + Green + "(" + active_directory.Path() + ")" + Reset + " $ " + newInput)
+func updatePrompt(oldInput, newInput string, activeDirectory filesystem.Directory) {
+	fmt.Print("\r" + strings.Repeat(" ", len(oldInput)+20) + "\r" + output.Green + "(" + activeDirectory.Path() + ")" + output.Reset + " $ " + newInput)
 }
 
-func name_input(reader *bufio.Reader) string {
+func nameInput(reader *bufio.Reader) string {
 	fmt.Print("Please enter your name: ")
 
 	text, _ := reader.ReadString('\n')

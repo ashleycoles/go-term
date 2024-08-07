@@ -1,7 +1,7 @@
-package main
+package output
 
 import "fmt"
 
-func new_line() {
+func NewLine() {
 	fmt.Printf("\r\n")
 }

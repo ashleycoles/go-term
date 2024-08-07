@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	"os"
@@ -6,7 +6,7 @@ import (
 	"runtime"
 )
 
-func command_clear() {
+func clearTerm() {
 	if runtime.GOOS == "windows" {
 		cmd := exec.Command("cmd", "/c", "cls")
 		cmd.Stdout = os.Stdout
