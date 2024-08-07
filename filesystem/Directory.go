@@ -5,20 +5,6 @@ import (
 	"strings"
 )
 
-type File struct {
-	Name      string
-	Extension string
-	Contents  string
-}
-
-func (file *File) FullName() string {
-	return file.Name + "." + file.Extension
-}
-
-func (file *File) AppendContent(content string) {
-	file.Contents += "\r\n" + content
-}
-
 type Directory struct {
 	Name     string
 	Parent   *Directory
@@ -159,20 +145,4 @@ func (directory *Directory) Traverse(path string) (*Directory, error) {
 	}
 
 	return tempDirectory, nil
-}
-
-func SetupFilesystem(user string) *Directory {
-	root := &Directory{Name: "root"}
-	users, _ := root.AddChild("users")
-	root.AddChild("etc")
-
-	home, _ := users.AddChild(user)
-	docs, _ := home.AddChild("Documents")
-	docs.AddFile("test", "txt", "Hello, world!\r\nFoo\r\nBar")
-
-	return root
-}
-
-func parseFilePath(path string) []string {
-	return strings.Split(strings.TrimRight(path, "/"), "/")
 }
