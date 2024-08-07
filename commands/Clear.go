@@ -6,7 +6,7 @@ import (
 	"runtime"
 )
 
-func clearTerm() {
+func Clear() {
 	if runtime.GOOS == "windows" {
 		cmd := exec.Command("cmd", "/c", "cls")
 		cmd.Stdout = os.Stdout

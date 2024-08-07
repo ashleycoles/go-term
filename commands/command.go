@@ -91,7 +91,7 @@ func Execute(command Command, activeDirectory **filesystem.Directory) {
 	case "append":
 		fappend(command, *activeDirectory)
 	case "clear":
-		clearTerm()
+		Clear()
 	default:
 		fmt.Fprintln(os.Stdout, "\rCommand not found")
 	}

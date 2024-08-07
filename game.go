@@ -19,6 +19,7 @@ import (
 )
 
 func main() {
+	commands.Clear()
 	reader := bufio.NewReader(os.Stdin)
 
 	name := nameInput(reader)
