@@ -15,5 +15,5 @@ func command_touch(command Command, active_directory **Directory) {
 			fmt.Printf("\r\n%s\r\n", err.Error())
 		}
 	}
-	fmt.Printf("\r\n")
+	new_line()
 }

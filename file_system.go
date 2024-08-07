@@ -15,6 +15,10 @@ func (file *File) FullName() string {
 	return file.name + "." + file.extension
 }
 
+func (file *File) AppendContent(content string) {
+	file.contents += "\r\n" + content
+}
+
 type Directory struct {
 	name     string
 	parent   *Directory
@@ -101,7 +105,7 @@ func (directory *Directory) GetFile(name string) (*File, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("File %q not found", name)
+	return nil, fmt.Errorf("file %s does not exist", name)
 }
 
 func (directory *Directory) Path() string {

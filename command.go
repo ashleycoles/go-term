@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"unicode"
 )
 
 type Command struct {
@@ -13,7 +14,7 @@ type Command struct {
 }
 
 func parse_command(command string) (string, []string, []string) {
-	command_tokens := strings.Fields(command)
+	command_tokens := tokenise_command(command)
 
 	var flags []string
 	var args []string
@@ -27,6 +28,46 @@ func parse_command(command string) (string, []string, []string) {
 	}
 
 	return command_tokens[0], flags, args
+}
+
+func tokenise_command(command string) []string {
+	var tokens []string
+	var token_builder strings.Builder
+	in_quotes := false
+	quote_char := rune(0)
+
+	for _, char := range command {
+		switch {
+		case char == '"' || char == '\'':
+			if in_quotes {
+				if char == quote_char {
+					in_quotes = false
+					tokens = append(tokens, token_builder.String())
+					token_builder.Reset()
+				} else {
+					token_builder.WriteRune(char)
+				}
+			} else {
+				in_quotes = true
+				quote_char = char
+			}
+		case unicode.IsSpace(char):
+			if in_quotes {
+				token_builder.WriteRune(char)
+			} else if token_builder.Len() > 0 {
+				tokens = append(tokens, token_builder.String())
+				token_builder.Reset()
+			}
+		default:
+			token_builder.WriteRune(char)
+		}
+	}
+
+	if token_builder.Len() > 0 {
+		tokens = append(tokens, token_builder.String())
+	}
+
+	return tokens
 }
 
 func command_execute(command Command, active_directory **Directory) {
@@ -45,10 +86,11 @@ func command_execute(command Command, active_directory **Directory) {
 		command_cat(command, active_directory)
 	case "touch":
 		command_touch(command, active_directory)
+	case "append":
+		command_append(command, *active_directory)
 	case "clear":
 		command_clear()
 	default:
 		fmt.Fprintln(os.Stdout, "\rCommand not found")
-
 	}
 }

@@ -12,5 +12,5 @@ func command_ls(active_directory **Directory) {
 	for _, file := range (*active_directory).files {
 		fmt.Printf("\r\n%s", file.FullName())
 	}
-	fmt.Printf("\r\n")
+	new_line()
 }

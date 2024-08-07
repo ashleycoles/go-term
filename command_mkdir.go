@@ -10,5 +10,5 @@ func command_mkdir(command Command, active_directory **Directory) {
 		}
 	}
 
-	fmt.Printf("\r\n")
+	new_line()
 }
