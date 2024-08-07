@@ -12,31 +12,12 @@ func command_cd(command Command, active_directory **Directory) {
 		return
 	}
 
-	path := parse_file_path(command.args[0])
+	target, err := (*active_directory).Traverse(command.args[0])
 
-	for _, target := range path {
-
-		if target == ".." {
-			if (*active_directory).parent == nil {
-				fmt.Printf("Error, no parent directory\r\n")
-				return
-			}
-			*active_directory = (*active_directory).parent
-			continue
-		}
-
-		found := false
-		for _, dir := range (*active_directory).children {
-			if dir.name == target {
-				*active_directory = dir
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			fmt.Printf("Error, directory %q not found in %s\r\n", target, (*active_directory).name)
-			return
-		}
+	if err != nil {
+		fmt.Printf("%s\r\n", err.Error())
+		return
 	}
+
+	*active_directory = target
 }

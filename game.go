@@ -129,14 +129,12 @@ func main() {
 			}
 		default: // normal characters
 			inputBuider.WriteRune(r)
-			fmt.Fprint(os.Stdout, string(r))
+			fmt.Print(string(r))
 		}
 	}
 }
 
 func updatePrompt(oldInput, newInput string, active_directory Directory) {
-	// Move cursor to start of the line and clear the line
-
 	fmt.Print("\r" + strings.Repeat(" ", len(oldInput)+20) + "\r" + Green + "(" + active_directory.Path() + ")" + Reset + " $ " + newInput)
 }
 

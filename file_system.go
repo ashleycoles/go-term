@@ -111,6 +111,43 @@ func (directory *Directory) Path() string {
 	return directory.parent.Path() + "/" + directory.name
 }
 
+func (directory *Directory) Traverse(path string) (*Directory, error) {
+	parsed_path := parse_file_path(path)
+
+	// Remove the last item if it's a file
+	last := parsed_path[len(parsed_path)-1]
+	if last != ".." && strings.Contains(last, ".") {
+		return nil, fmt.Errorf("not a directory: %s", last)
+	}
+
+	var temp_directory = directory
+
+	for _, target := range parsed_path {
+		if target == ".." {
+			if temp_directory.parent == nil {
+				return nil, fmt.Errorf("no parent directory: %s", temp_directory.name)
+			}
+			temp_directory = directory.parent
+			continue
+		}
+
+		found := false
+		for _, dir := range temp_directory.children {
+			if dir.name == target {
+				temp_directory = dir
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return nil, fmt.Errorf("no such file directory: %s", path)
+		}
+	}
+
+	return temp_directory, nil
+}
+
 func setup_file_system(user string) *Directory {
 	root := &Directory{name: "root"}
 	users, _ := root.AddChild("users")
