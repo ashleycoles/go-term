@@ -1,4 +1,4 @@
-package output
+package terminal
 
 const Reset = "\033[0m"
 const Red = "\033[31m"

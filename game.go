@@ -3,14 +3,11 @@ package main
 import (
 	"ash/text-game/commands"
 	"ash/text-game/filesystem"
-	"ash/text-game/output"
+	"ash/text-game/terminal"
 	"bufio"
 	"fmt"
 	"os"
-	"regexp"
 	"strings"
-
-	"golang.org/x/term"
 )
 
 func main() {
@@ -19,25 +16,13 @@ func main() {
 
 	name := nameInput(reader)
 
-	fileSystem := filesystem.SetupFilesystem(name)
+	fileSystem := filesystem.Setup(name)
 
 	activeDirectory := fileSystem
 
-	fd := int(os.Stdin.Fd())
-	oldState, err := term.MakeRaw(fd)
+	oldState, fd := terminal.Setup()
 
-	if err != nil {
-		fmt.Fprint(os.Stderr, "Error setting raw mode: ", err.Error())
-		os.Exit(1)
-	}
-
-	defer func() {
-		fmt.Print("Restoring terminal mode")
-		if err := term.Restore(fd, oldState); err != nil {
-			fmt.Fprintln(os.Stderr, "Error restoring terminal mode: ", err.Error())
-		}
-		os.Stdout.Sync()
-	}()
+	defer terminal.Restore(oldState, fd)
 
 	var inputBuilder strings.Builder
 	var inputBuffer string
@@ -45,7 +30,7 @@ func main() {
 	historyIndex := 0
 	cursorPos := 0
 
-	fmt.Printf("%s(%s)%s $ ", output.Green, activeDirectory.Path(), output.Reset)
+	fmt.Printf("%s(%s)%s $ ", terminal.Green, activeDirectory.Path(), terminal.Reset)
 
 	for {
 		r, _, err := reader.ReadRune()
@@ -58,7 +43,7 @@ func main() {
 		switch r {
 		case '\r', '\n': // enter
 			if inputBuilder.Len() == 0 {
-				updateHorizontal("", 0, *activeDirectory)
+				terminal.UpdatePrompt("", 0, *activeDirectory)
 				continue
 			}
 
@@ -74,7 +59,8 @@ func main() {
 				Args:    args,
 				Flags:   flags,
 			}, &activeDirectory)
-			updateHorizontal("", 0, *activeDirectory)
+
+			terminal.UpdatePrompt("", 0, *activeDirectory)
 		case 127: // backspace
 			if inputBuilder.Len() > 0 && cursorPos > 0 {
 				input := inputBuilder.String()
@@ -86,7 +72,7 @@ func main() {
 					inputBuilder.WriteString(input[cursorPos:])
 				}
 				cursorPos--
-				updateHorizontal(inputBuilder.String(), cursorPos, *activeDirectory)
+				terminal.UpdatePrompt(inputBuilder.String(), cursorPos, *activeDirectory)
 			}
 		case '\x03': // ctrl + c
 			return
@@ -108,7 +94,7 @@ func main() {
 					if historyIndex > 0 {
 						historyIndex--
 						inputBuffer = commandHistory[historyIndex]
-						updateHorizontal(inputBuffer, len(inputBuffer), *activeDirectory)
+						terminal.UpdatePrompt(inputBuffer, len(inputBuffer), *activeDirectory)
 						inputBuilder.Reset()
 						inputBuilder.WriteString(inputBuffer)
 						cursorPos = len(inputBuffer)
@@ -117,25 +103,25 @@ func main() {
 					if historyIndex < len(commandHistory)-1 {
 						historyIndex++
 						inputBuffer = commandHistory[historyIndex]
-						updateHorizontal(inputBuffer, len(inputBuffer), *activeDirectory)
+						terminal.UpdatePrompt(inputBuffer, len(inputBuffer), *activeDirectory)
 						inputBuilder.Reset()
 						inputBuilder.WriteString(inputBuffer)
 						cursorPos = len(inputBuffer)
 					} else if historyIndex == len(commandHistory)-1 {
 						historyIndex++
 						inputBuffer = ""
-						updateHorizontal(inputBuffer, 0, *activeDirectory)
+						terminal.UpdatePrompt(inputBuffer, 0, *activeDirectory)
 						inputBuilder.Reset()
 					}
 				case 'D': // left
 					if cursorPos > 0 {
 						cursorPos--
-						updateHorizontal(inputBuilder.String(), cursorPos, *activeDirectory)
+						terminal.UpdatePrompt(inputBuilder.String(), cursorPos, *activeDirectory)
 					}
 				case 'C': // right
 					if cursorPos < inputBuilder.Len() {
 						cursorPos++
-						updateHorizontal(inputBuilder.String(), cursorPos, *activeDirectory)
+						terminal.UpdatePrompt(inputBuilder.String(), cursorPos, *activeDirectory)
 					}
 				}
 			}
@@ -150,21 +136,9 @@ func main() {
 				inputBuilder.WriteRune(r)
 			}
 			cursorPos++
-			updateHorizontal(inputBuilder.String(), cursorPos, *activeDirectory)
+			terminal.UpdatePrompt(inputBuilder.String(), cursorPos, *activeDirectory)
 		}
 	}
-}
-
-func updateHorizontal(input string, cursorPos int, activeDirectory filesystem.Directory) {
-	fmt.Print("\033[2K\r")
-	prompt := fmt.Sprintf("%s(%s)%s $ ", output.Green, activeDirectory.Path(), output.Reset)
-	fmt.Print(prompt)
-	fmt.Print(input)
-	moveCursor(cursorPos + len(stripANSI(prompt)))
-}
-
-func moveCursor(pos int) {
-	fmt.Printf("\033[%dG", pos+1)
 }
 
 func nameInput(reader *bufio.Reader) string {
@@ -174,9 +148,4 @@ func nameInput(reader *bufio.Reader) string {
 
 	text = strings.Replace(text, "\n", "", -1)
 	return text
-}
-
-func stripANSI(str string) string {
-	re := regexp.MustCompile(`\x1b\[[0-9;]*m`)
-	return re.ReplaceAllString(str, "")
 }

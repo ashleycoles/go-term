@@ -2,7 +2,7 @@ package commands
 
 import (
 	"ash/text-game/filesystem"
-	"ash/text-game/output"
+	"ash/text-game/terminal"
 	"fmt"
 	"strings"
 )
@@ -17,5 +17,5 @@ func touch(command Command, activeDirectory **filesystem.Directory) {
 			fmt.Printf("\r\n%s\r\n", err.Error())
 		}
 	}
-	output.NewLine()
+	terminal.NewLine()
 }

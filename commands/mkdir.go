@@ -2,7 +2,7 @@ package commands
 
 import (
 	"ash/text-game/filesystem"
-	"ash/text-game/output"
+	"ash/text-game/terminal"
 	"fmt"
 )
 
@@ -14,5 +14,5 @@ func mkdir(command Command, activeDirectory **filesystem.Directory) {
 		}
 	}
 
-	output.NewLine()
+	terminal.NewLine()
 }

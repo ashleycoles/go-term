@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-func SetupFilesystem(user string) *Directory {
+func Setup(user string) *Directory {
 	root := &Directory{Name: "root"}
 	users, _ := root.AddChild("users")
 	root.AddChild("etc")

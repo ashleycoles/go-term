@@ -2,7 +2,7 @@ package commands
 
 import (
 	"ash/text-game/filesystem"
-	"ash/text-game/output"
+	"ash/text-game/terminal"
 	"fmt"
 )
 
@@ -20,5 +20,5 @@ func fappend(command Command, activeDirectory *filesystem.Directory) {
 	}
 
 	file.AppendContent(content)
-	output.NewLine()
+	terminal.NewLine()
 }
