@@ -2,7 +2,6 @@ package main
 
 // Added an add file method to the directory struct
 // Need to do:
-// Update rm to include files
 // Implement rm recursive delete for files and folders
 // touch command
 // Text editor?

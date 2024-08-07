@@ -62,7 +62,7 @@ func (directory *Directory) RemoveChild(name string) error {
 func (directory *Directory) AddFile(name string, extension string, contents string) error {
 	for _, file := range directory.files {
 		if file.name == name && file.extension == extension {
-			return fmt.Errorf("File %s already exists", name)
+			return fmt.Errorf("file %s already exists", name)
 		}
 	}
 
@@ -109,6 +109,15 @@ func (directory *Directory) Path() string {
 		return directory.name
 	}
 	return directory.parent.Path() + "/" + directory.name
+}
+
+func (directory *Directory) FileExists(name string) bool {
+	for _, file := range directory.files {
+		if name == file.FullName() {
+			return true
+		}
+	}
+	return false
 }
 
 func (directory *Directory) Traverse(path string) (*Directory, error) {

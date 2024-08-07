@@ -43,6 +43,8 @@ func command_execute(command Command, active_directory **Directory) {
 		command_rm(command, active_directory)
 	case "cat":
 		command_cat(command, active_directory)
+	case "touch":
+		command_touch(command, active_directory)
 	case "clear":
 		command_clear()
 	default:
