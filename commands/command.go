@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"unicode"
 
@@ -93,6 +92,6 @@ func Execute(command Command, activeDirectory **filesystem.Directory) {
 	case "clear":
 		Clear()
 	default:
-		fmt.Fprintln(os.Stdout, "\rCommand not found")
+		fmt.Printf("\r\nCommand not found: %s\r\n", command.Command)
 	}
 }

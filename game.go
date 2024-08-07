@@ -1,11 +1,5 @@
 package main
 
-// Added an add file method to the directory struct
-// Need to do:
-// Implement rm recursive delete for files and folders
-// touch command
-// Text editor?
-
 import (
 	"ash/text-game/commands"
 	"ash/text-game/filesystem"
@@ -13,6 +7,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
 	"golang.org/x/term"
@@ -37,7 +32,7 @@ func main() {
 	}
 
 	defer func() {
-		fmt.Fprintln(os.Stdout, "Restoring terminal mode")
+		fmt.Print("Restoring terminal mode")
 		if err := term.Restore(fd, oldState); err != nil {
 			fmt.Fprintln(os.Stderr, "Error restoring terminal mode: ", err.Error())
 		}
@@ -48,6 +43,7 @@ func main() {
 	var inputBuffer string
 	var commandHistory []string
 	historyIndex := 0
+	cursorPos := 0
 
 	fmt.Printf("%s(%s)%s $ ", output.Green, activeDirectory.Path(), output.Reset)
 
@@ -62,7 +58,7 @@ func main() {
 		switch r {
 		case '\r', '\n': // enter
 			if inputBuilder.Len() == 0 {
-				fmt.Printf("\r\n%s(%s)%s $ ", output.Green, activeDirectory.Path(), output.Reset)
+				updateHorizontal("", 0, *activeDirectory)
 				continue
 			}
 
@@ -71,27 +67,30 @@ func main() {
 
 			command, flags, args := commands.ParseCommand(inputBuilder.String())
 			inputBuilder.Reset()
+			cursorPos = 0
 
 			commands.Execute(commands.Command{
 				Command: command,
 				Args:    args,
 				Flags:   flags,
 			}, &activeDirectory)
-			fmt.Printf("%s(%s)%s $ ", output.Green, activeDirectory.Path(), output.Reset)
+			updateHorizontal("", 0, *activeDirectory)
 		case 127: // backspace
-			if inputBuilder.Len() > 0 {
+			if inputBuilder.Len() > 0 && cursorPos > 0 {
 				input := inputBuilder.String()
 				inputBuilder.Reset()
 
-				if len(input) > 1 {
-					inputBuilder.WriteString(input[:len(input)-1])
+				if cursorPos > 1 {
+					inputBuilder.WriteString(input[:cursorPos-1] + input[cursorPos:])
+				} else {
+					inputBuilder.WriteString(input[cursorPos:])
 				}
-
-				fmt.Print("\b \b")
+				cursorPos--
+				updateHorizontal(inputBuilder.String(), cursorPos, *activeDirectory)
 			}
 		case '\x03': // ctrl + c
 			return
-		case '\x1b':
+		case '\x1b': // Arrow keys
 			next, _, err := reader.ReadRune()
 			if err != nil {
 				fmt.Fprintln(os.Stderr, "Error reading rune", err.Error())
@@ -104,41 +103,68 @@ func main() {
 					fmt.Fprintln(os.Stderr, "Error reading rune", err.Error())
 					continue
 				}
-
 				switch next {
 				case 'A': // up
 					if historyIndex > 0 {
 						historyIndex--
 						inputBuffer = commandHistory[historyIndex]
-						updatePrompt(inputBuilder.String(), inputBuffer, *activeDirectory)
+						updateHorizontal(inputBuffer, len(inputBuffer), *activeDirectory)
 						inputBuilder.Reset()
 						inputBuilder.WriteString(inputBuffer)
+						cursorPos = len(inputBuffer)
 					}
 				case 'B': // down
 					if historyIndex < len(commandHistory)-1 {
 						historyIndex++
 						inputBuffer = commandHistory[historyIndex]
-						fmt.Printf("%s(%s)%s $ %s", output.Green, activeDirectory.Path(), output.Reset, inputBuffer)
-						updatePrompt(inputBuilder.String(), inputBuffer, *activeDirectory)
+						updateHorizontal(inputBuffer, len(inputBuffer), *activeDirectory)
 						inputBuilder.Reset()
 						inputBuilder.WriteString(inputBuffer)
+						cursorPos = len(inputBuffer)
 					} else if historyIndex == len(commandHistory)-1 {
 						historyIndex++
 						inputBuffer = ""
-						updatePrompt(inputBuilder.String(), inputBuffer, *activeDirectory)
+						updateHorizontal(inputBuffer, 0, *activeDirectory)
 						inputBuilder.Reset()
+					}
+				case 'D': // left
+					if cursorPos > 0 {
+						cursorPos--
+						updateHorizontal(inputBuilder.String(), cursorPos, *activeDirectory)
+					}
+				case 'C': // right
+					if cursorPos < inputBuilder.Len() {
+						cursorPos++
+						updateHorizontal(inputBuilder.String(), cursorPos, *activeDirectory)
 					}
 				}
 			}
 		default: // normal characters
-			inputBuilder.WriteRune(r)
-			fmt.Print(string(r))
+			if cursorPos < inputBuilder.Len() {
+				input := inputBuilder.String()
+				inputBuilder.Reset()
+				inputBuilder.WriteString(input[:cursorPos])
+				inputBuilder.WriteRune(r)
+				inputBuilder.WriteString(input[cursorPos:])
+			} else {
+				inputBuilder.WriteRune(r)
+			}
+			cursorPos++
+			updateHorizontal(inputBuilder.String(), cursorPos, *activeDirectory)
 		}
 	}
 }
 
-func updatePrompt(oldInput, newInput string, activeDirectory filesystem.Directory) {
-	fmt.Print("\r" + strings.Repeat(" ", len(oldInput)+20) + "\r" + output.Green + "(" + activeDirectory.Path() + ")" + output.Reset + " $ " + newInput)
+func updateHorizontal(input string, cursorPos int, activeDirectory filesystem.Directory) {
+	fmt.Print("\033[2K\r")
+	prompt := fmt.Sprintf("%s(%s)%s $ ", output.Green, activeDirectory.Path(), output.Reset)
+	fmt.Print(prompt)
+	fmt.Print(input)
+	moveCursor(cursorPos + len(stripANSI(prompt)))
+}
+
+func moveCursor(pos int) {
+	fmt.Printf("\033[%dG", pos+1)
 }
 
 func nameInput(reader *bufio.Reader) string {
@@ -148,4 +174,9 @@ func nameInput(reader *bufio.Reader) string {
 
 	text = strings.Replace(text, "\n", "", -1)
 	return text
+}
+
+func stripANSI(str string) string {
+	re := regexp.MustCompile(`\x1b\[[0-9;]*m`)
+	return re.ReplaceAllString(str, "")
 }
