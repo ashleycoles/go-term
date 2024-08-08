@@ -14,6 +14,10 @@ type Command struct {
 	Flags   []string
 }
 
+func (command *Command) ArgsCount() int {
+	return len(command.Args)
+}
+
 func ParseCommand(command string) (string, []string, []string) {
 	commandTokens := tokeniseCommand(command)
 
@@ -80,7 +84,7 @@ func Execute(command Command, activeDirectory **filesystem.Directory) {
 	case "mkdir":
 		mkdir(command, activeDirectory)
 	case "ls":
-		ls(activeDirectory)
+		ls(command, activeDirectory)
 	case "pwd":
 		pwd(activeDirectory)
 	case "rm":
