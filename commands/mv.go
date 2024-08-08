@@ -7,6 +7,7 @@ import (
 )
 
 func mv(command Command, activeDirectory **filesystem.Directory) {
+	// TODO: Check for 2 args
 	source := command.Args[0]
 	target := command.Args[1]
 

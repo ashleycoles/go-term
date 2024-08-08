@@ -9,7 +9,7 @@ import (
 func cd(command Command, activeDirectory **filesystem.Directory) {
 	terminal.NewLine()
 
-	if len(command.Args) != 1 {
+	if command.ArgsCount() != 1 {
 		fmt.Printf("Error, must specify a single directory\r\n")
 		return
 	}

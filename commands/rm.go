@@ -7,7 +7,7 @@ import (
 )
 
 func rm(command Command, activeDirectory **filesystem.Directory) {
-	if len(command.Args) < 1 {
+	if command.ArgsCount() < 1 {
 		fmt.Print("\r\nrm: No file or directory specified\r\n")
 		return
 	}

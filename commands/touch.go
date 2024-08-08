@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// TODO: Reject file names that don't have an extension
 func touch(command Command, activeDirectory **filesystem.Directory) {
 	for _, newFileName := range command.Args {
 		fileParts := strings.Split(newFileName, ".")

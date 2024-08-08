@@ -6,7 +6,7 @@ import (
 )
 
 func cat(command Command, activeDirectory **filesystem.Directory) {
-	if len(command.Args) != 1 {
+	if command.ArgsCount() != 1 {
 		fmt.Print("\r\ncat: Must specify one file")
 	}
 
