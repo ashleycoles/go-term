@@ -11,7 +11,6 @@ import (
 )
 
 // TODO: Better system for registering commands
-// TODO: mv command
 
 const (
 	enter       = '\r'
