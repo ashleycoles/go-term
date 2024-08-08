@@ -131,7 +131,7 @@ func (directory *Directory) Traverse(path string) (*Directory, error) {
 	if last == "." {
 		return directory, nil
 	}
-	
+
 	var tempDirectory = directory
 
 	for _, target := range parsedPath.Folders {
@@ -153,7 +153,7 @@ func (directory *Directory) Traverse(path string) (*Directory, error) {
 		}
 
 		if !found {
-			return nil, fmt.Errorf("no such file directory: %s", path)
+			return nil, fmt.Errorf("no such file or directory: %s", path)
 		}
 	}
 
