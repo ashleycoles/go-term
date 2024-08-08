@@ -91,6 +91,8 @@ func Execute(command Command, activeDirectory **filesystem.Directory) {
 		touch(command, activeDirectory)
 	case "append":
 		fappend(command, *activeDirectory)
+	case "fetch":
+		fetch(command)
 	case "clear":
 		Clear()
 	default:
