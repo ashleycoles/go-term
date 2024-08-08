@@ -69,15 +69,11 @@ func main() {
 			commandHistory = append(commandHistory, inputBuilder.String())
 			historyIndex = len(commandHistory)
 
-			command, flags, args := commands.ParseCommand(inputBuilder.String())
+			command := commands.ParseCommand(inputBuilder.String())
 			inputBuilder.Reset()
 			cursorPos = 0
 
-			commands.Execute(commands.Command{
-				Command: command,
-				Args:    args,
-				Flags:   flags,
-			}, &activeDirectory)
+			commands.Execute(command, &activeDirectory)
 
 			terminal.UpdatePrompt("", 0, *activeDirectory)
 		case backspace:

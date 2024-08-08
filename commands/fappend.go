@@ -6,9 +6,6 @@ import (
 	"fmt"
 )
 
-// Todo:
-// figure out spaces in strings
-// Remove quotes from strings
 func fappend(command Command, activeDirectory *filesystem.Directory) {
 	name := command.Args[0]
 	content := command.Args[1]

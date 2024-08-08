@@ -21,11 +21,11 @@ func ls(command Command, activeDirectory **filesystem.Directory) {
 			if argsCount > 1 {
 				fmt.Printf("\r\n%s:", directory.Name)
 			}
-			
+
 			displayContents(&directory)
 
 			if argsCount > 1 && i < argsCount-1 {
-				fmt.Print("\r\n")
+				terminal.NewLine()
 			}
 		}
 	}

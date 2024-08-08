@@ -8,31 +8,53 @@ import (
 	"ash/text-game/filesystem"
 )
 
+type ValueFlag struct {
+	Key   string
+	Value string
+}
+
 type Command struct {
-	Command string
-	Args    []string
-	Flags   []string
+	Command    string
+	Args       []string
+	ValueFlags []ValueFlag
+	Flags      []string
 }
 
 func (command *Command) ArgsCount() int {
 	return len(command.Args)
 }
 
-func ParseCommand(command string) (string, []string, []string) {
+func ParseCommand(command string) Command {
 	commandTokens := tokeniseCommand(command)
 
 	var flags []string
 	var args []string
+	var valueFlags []ValueFlag
 
 	for _, token := range commandTokens[1:] {
-		if strings.HasPrefix(token, "-") {
-			flags = append(flags, token)
+		if strings.HasPrefix(token, "--") {
+			trimmedFlag := strings.TrimLeft(token, "--")
+			splitFlag := strings.Split(trimmedFlag, "=")
+
+			valueFlags = append(valueFlags, ValueFlag{
+				Key:   splitFlag[0],
+				Value: splitFlag[1],
+			})
+		} else if strings.HasPrefix(token, "-") {
+			trimmedFlag := strings.TrimLeft(token, "-")
+			splitFlags := strings.Split(trimmedFlag, "")
+			flags = append(flags, splitFlags...)
 		} else {
 			args = append(args, token)
 		}
 	}
 
-	return commandTokens[0], flags, args
+	return Command{
+		Command:    commandTokens[0],
+		Args:       args,
+		ValueFlags: valueFlags,
+		Flags:      flags,
+	}
 }
 
 func tokeniseCommand(command string) []string {
