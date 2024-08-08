@@ -32,13 +32,15 @@ func (directory *Directory) AddChild(name string) (*Directory, error) {
 }
 
 func (directory *Directory) AddExistingChild(child *Directory) error {
-	for _, child := range directory.Children {
-		if child.Name == child.Name {
+
+	for _, directoryChild := range directory.Children {
+		if directoryChild.Name == child.Name {
 			return fmt.Errorf("directory %q already exists", child.Name)
 		}
 	}
 
 	directory.Children = append(directory.Children, child)
+
 	return nil
 }
 
@@ -137,7 +139,7 @@ func (directory *Directory) Traverse(path string) (*Directory, error) {
 			if tempDirectory.Parent == nil {
 				return nil, fmt.Errorf("no Parent directory: %s", tempDirectory.Name)
 			}
-			tempDirectory = directory.Parent
+			tempDirectory = tempDirectory.Parent
 			continue
 		}
 
