@@ -124,21 +124,17 @@ func (directory *Directory) FileExists(name string) bool {
 }
 
 func (directory *Directory) Traverse(path string) (*Directory, error) {
-	parsedPath := ParseFilePath(path)
+	parsedPath := ParsePath(path)
 
-	last := parsedPath[len(parsedPath)-1]
+	last := parsedPath.GetLastFolder()
 
 	if last == "." {
 		return directory, nil
 	}
-
-	if last != ".." && strings.Contains(last, ".") {
-		parsedPath = parsedPath[:len(parsedPath)-1]
-	}
-
+	
 	var tempDirectory = directory
 
-	for _, target := range parsedPath {
+	for _, target := range parsedPath.Folders {
 		if target == ".." {
 			if tempDirectory.Parent == nil {
 				return nil, fmt.Errorf("no Parent directory: %s", tempDirectory.Name)

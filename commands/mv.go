@@ -4,7 +4,6 @@ import (
 	"ash/text-game/filesystem"
 	"ash/text-game/terminal"
 	"fmt"
-	"strings"
 )
 
 func mv(command Command, activeDirectory **filesystem.Directory) {
@@ -22,11 +21,10 @@ func mv(command Command, activeDirectory **filesystem.Directory) {
 		return
 	}
 
-	sourcePath := filesystem.ParseFilePath(source)
-	toMove := sourcePath[len(sourcePath)-1]
-	isFile := toMove != ".." && strings.Contains(toMove, ".")
+	sourcePath := filesystem.ParsePath(source)
+	toMove := sourcePath.GetLastFolder()
 
-	if isFile {
+	if sourcePath.HasFile() {
 		file, err := sourceDirectory.GetFile(toMove)
 		if err != nil {
 			fmt.Printf("\r\nmv: %s", err.Error())

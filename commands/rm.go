@@ -4,7 +4,6 @@ import (
 	"ash/text-game/filesystem"
 	"ash/text-game/terminal"
 	"fmt"
-	"strings"
 )
 
 func rm(command Command, activeDirectory **filesystem.Directory) {
@@ -20,20 +19,20 @@ func rm(command Command, activeDirectory **filesystem.Directory) {
 			return
 		}
 
-		parsedTarget := filesystem.ParseFilePath(target)
-		last := parsedTarget[len(parsedTarget)-1]
+		parsedTarget := filesystem.ParsePath(target)
+		lastFolder := parsedTarget.GetLastFolder()
 
-		if last == "." || last == ".." {
+		if lastFolder == "." || lastFolder == ".." {
 			fmt.Print("\r\nrm: \".\" and \"..\" may not be removed")
 			return
 		}
 
-		if strings.Contains(last, ".") {
-			if err := targetDirectory.RemoveFile(last); err != nil {
+		if parsedTarget.HasFile() {
+			if err := targetDirectory.RemoveFile(*parsedTarget.File); err != nil {
 				fmt.Printf("\r\n%s", err.Error())
 			}
 		} else {
-			if err := targetDirectory.Parent.RemoveChild(last); err != nil {
+			if err := targetDirectory.Parent.RemoveChild(lastFolder); err != nil {
 				fmt.Printf("\r\n%s", err.Error())
 			}
 		}
