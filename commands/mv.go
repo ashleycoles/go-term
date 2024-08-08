@@ -46,7 +46,8 @@ func mv(command Command, activeDirectory **filesystem.Directory) {
 		}
 	} else {
 		sourceParent := sourceDirectory.Parent
-		if sourceParent == nil {
+		sourceIsRoot := sourceParent == nil
+		if sourceIsRoot {
 			fmt.Printf("\r\nmv: cannot move: %s", sourceDirectory.Name)
 			return
 		}
@@ -64,8 +65,6 @@ func mv(command Command, activeDirectory **filesystem.Directory) {
 			fmt.Printf("\r\nmv: %s", err.Error())
 			return
 		}
-
 	}
-
 	terminal.NewLine()
 }
