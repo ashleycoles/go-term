@@ -11,6 +11,11 @@ import (
 )
 
 // TODO: Better system for registering commands
+// TODO: Update ls to use traversal
+// TODO: Update touch to use traversal
+// TODO: Update fappend to use traversal
+// TODO: Update cat to use traversal
+// TODO: HTTP request tool similar to curl but simpler
 
 const (
 	enter       = '\r'
@@ -89,7 +94,7 @@ func main() {
 				cursorPos--
 				terminal.UpdatePrompt(inputBuilder.String(), cursorPos, *activeDirectory)
 			}
-		case ctrlC: // ctrl + c
+		case ctrlC:
 			return
 		case escape:
 			next, _, err := reader.ReadRune()
@@ -105,7 +110,7 @@ func main() {
 					continue
 				}
 				switch next {
-				case upArrow: // up
+				case upArrow:
 					if historyIndex > 0 {
 						historyIndex--
 						inputBuffer = commandHistory[historyIndex]
@@ -114,7 +119,7 @@ func main() {
 						inputBuilder.WriteString(inputBuffer)
 						cursorPos = len(inputBuffer)
 					}
-				case downArrow: // down
+				case downArrow:
 					if historyIndex < len(commandHistory)-1 {
 						historyIndex++
 						inputBuffer = commandHistory[historyIndex]
@@ -128,12 +133,12 @@ func main() {
 						terminal.UpdatePrompt(inputBuffer, 0, *activeDirectory)
 						inputBuilder.Reset()
 					}
-				case leftArrow: // left
+				case leftArrow:
 					if cursorPos > 0 {
 						cursorPos--
 						terminal.UpdatePrompt(inputBuilder.String(), cursorPos, *activeDirectory)
 					}
-				case rightArrow: // right
+				case rightArrow:
 					if cursorPos < inputBuilder.Len() {
 						cursorPos++
 						terminal.UpdatePrompt(inputBuilder.String(), cursorPos, *activeDirectory)
