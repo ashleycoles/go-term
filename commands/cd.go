@@ -2,11 +2,12 @@ package commands
 
 import (
 	"ash/text-game/filesystem"
+	"ash/text-game/terminal"
 	"fmt"
 )
 
 func cd(command Command, activeDirectory **filesystem.Directory) {
-	fmt.Printf("\r\n")
+	terminal.NewLine()
 
 	if len(command.Args) != 1 {
 		fmt.Printf("Error, must specify a single directory\r\n")

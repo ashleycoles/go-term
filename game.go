@@ -10,6 +10,22 @@ import (
 	"strings"
 )
 
+// TODO: Better system for registering commands
+// TODO: mv command
+
+const (
+	enter       = '\r'
+	newline     = '\n'
+	backspace   = 127
+	ctrlC       = '\x03'
+	escape      = '\x1b'
+	arrowPrefix = '['
+	upArrow     = 'A'
+	downArrow   = 'B'
+	leftArrow   = 'D'
+	rightArrow  = 'C'
+)
+
 func main() {
 	commands.Clear()
 	reader := bufio.NewReader(os.Stdin)
@@ -41,7 +57,7 @@ func main() {
 		}
 
 		switch r {
-		case '\r', '\n': // enter
+		case enter, newline:
 			if inputBuilder.Len() == 0 {
 				terminal.UpdatePrompt("", 0, *activeDirectory)
 				continue
@@ -61,7 +77,7 @@ func main() {
 			}, &activeDirectory)
 
 			terminal.UpdatePrompt("", 0, *activeDirectory)
-		case 127: // backspace
+		case backspace:
 			if inputBuilder.Len() > 0 && cursorPos > 0 {
 				input := inputBuilder.String()
 				inputBuilder.Reset()
@@ -74,23 +90,23 @@ func main() {
 				cursorPos--
 				terminal.UpdatePrompt(inputBuilder.String(), cursorPos, *activeDirectory)
 			}
-		case '\x03': // ctrl + c
+		case ctrlC: // ctrl + c
 			return
-		case '\x1b': // Arrow keys
+		case escape:
 			next, _, err := reader.ReadRune()
 			if err != nil {
 				fmt.Fprintln(os.Stderr, "Error reading rune", err.Error())
 				continue
 			}
 
-			if next == '[' {
+			if next == arrowPrefix {
 				next, _, err := reader.ReadRune()
 				if err != nil {
 					fmt.Fprintln(os.Stderr, "Error reading rune", err.Error())
 					continue
 				}
 				switch next {
-				case 'A': // up
+				case upArrow: // up
 					if historyIndex > 0 {
 						historyIndex--
 						inputBuffer = commandHistory[historyIndex]
@@ -99,7 +115,7 @@ func main() {
 						inputBuilder.WriteString(inputBuffer)
 						cursorPos = len(inputBuffer)
 					}
-				case 'B': // down
+				case downArrow: // down
 					if historyIndex < len(commandHistory)-1 {
 						historyIndex++
 						inputBuffer = commandHistory[historyIndex]
@@ -113,12 +129,12 @@ func main() {
 						terminal.UpdatePrompt(inputBuffer, 0, *activeDirectory)
 						inputBuilder.Reset()
 					}
-				case 'D': // left
+				case leftArrow: // left
 					if cursorPos > 0 {
 						cursorPos--
 						terminal.UpdatePrompt(inputBuilder.String(), cursorPos, *activeDirectory)
 					}
-				case 'C': // right
+				case rightArrow: // right
 					if cursorPos < inputBuilder.Len() {
 						cursorPos++
 						terminal.UpdatePrompt(inputBuilder.String(), cursorPos, *activeDirectory)

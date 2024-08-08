@@ -16,6 +16,7 @@ func Setup(user string) *Directory {
 	return root
 }
 
-func parseFilePath(path string) []string {
+// TODO: Move into own file and create a path struct
+func ParseFilePath(path string) []string {
 	return strings.Split(strings.TrimRight(path, "/"), "/")
 }

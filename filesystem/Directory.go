@@ -31,6 +31,17 @@ func (directory *Directory) AddChild(name string) (*Directory, error) {
 	return child, nil
 }
 
+func (directory *Directory) AddExistingChild(child *Directory) error {
+	for _, child := range directory.Children {
+		if child.Name == child.Name {
+			return fmt.Errorf("directory %q already exists", child.Name)
+		}
+	}
+
+	directory.Children = append(directory.Children, child)
+	return nil
+}
+
 func (directory *Directory) RemoveChild(name string) error {
 	index := -1
 
@@ -111,12 +122,12 @@ func (directory *Directory) FileExists(name string) bool {
 }
 
 func (directory *Directory) Traverse(path string) (*Directory, error) {
-	parsedPath := parseFilePath(path)
+	parsedPath := ParseFilePath(path)
 
 	// Remove the last item if it's a file
 	last := parsedPath[len(parsedPath)-1]
 	if last != ".." && strings.Contains(last, ".") {
-		return nil, fmt.Errorf("not a directory: %s", last)
+		parsedPath = parsedPath[:len(parsedPath)-1]
 	}
 
 	var tempDirectory = directory

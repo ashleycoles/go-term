@@ -75,6 +75,8 @@ func Execute(command Command, activeDirectory **filesystem.Directory) {
 	switch command.Command {
 	case "cd":
 		cd(command, activeDirectory)
+	case "mv":
+		mv(command, activeDirectory)
 	case "mkdir":
 		mkdir(command, activeDirectory)
 	case "ls":
