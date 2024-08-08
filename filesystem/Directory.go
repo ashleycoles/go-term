@@ -126,8 +126,12 @@ func (directory *Directory) FileExists(name string) bool {
 func (directory *Directory) Traverse(path string) (*Directory, error) {
 	parsedPath := ParseFilePath(path)
 
-	// Remove the last item if it's a file
 	last := parsedPath[len(parsedPath)-1]
+
+	if last == "." {
+		return directory, nil
+	}
+
 	if last != ".." && strings.Contains(last, ".") {
 		parsedPath = parsedPath[:len(parsedPath)-1]
 	}
