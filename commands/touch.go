@@ -4,18 +4,14 @@ import (
 	"ash/text-game/filesystem"
 	"ash/text-game/terminal"
 	"fmt"
-	"strings"
 )
 
-// TODO: Reject file names that don't have an extension
 func touch(command Command, activeDirectory **filesystem.Directory) {
 	for _, newFileName := range command.Args {
-		fileParts := strings.Split(newFileName, ".")
-
-		err := (*activeDirectory).AddFile(fileParts[0], fileParts[1], "")
-
-		if err != nil {
-			fmt.Printf("\r\n%s\r\n", err.Error())
+		if name, extension, err := filesystem.GetFilenameParts(newFileName); err != nil {
+			fmt.Printf("\r\ntouch: %s", err.Error())
+		} else if err := (*activeDirectory).AddFile(name, extension, ""); err != nil {
+			fmt.Printf("\r\ntouch: %s", err.Error())
 		}
 	}
 	terminal.NewLine()
