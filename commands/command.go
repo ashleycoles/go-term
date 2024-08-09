@@ -24,6 +24,25 @@ func (command *Command) ArgsCount() int {
 	return len(command.Args)
 }
 
+func (command *Command) HasValueFlag(key string) bool {
+	for _, flag := range command.ValueFlags {
+		if flag.Key == key {
+			return true
+		}
+	}
+	return false
+}
+
+func (command *Command) getFlagValue(key string) (string, error) {
+	for _, flag := range command.ValueFlags {
+		if flag.Key == key {
+			return flag.Value, nil
+		}
+	}
+
+	return "", fmt.Errorf("flag %s not found", key)
+}
+
 func ParseCommand(command string) Command {
 	commandTokens := tokeniseCommand(command)
 
