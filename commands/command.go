@@ -137,7 +137,7 @@ func Execute(command Command, activeDirectory **filesystem.Directory) {
 	case "append":
 		fappend(command, *activeDirectory)
 	case "fetch":
-		fetch(command)
+		fetch(command, *activeDirectory)
 	case "clear":
 		Clear()
 	default:

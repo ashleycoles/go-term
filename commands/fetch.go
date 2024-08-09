@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"ash/text-game/filesystem"
 	"ash/text-game/terminal"
 	"bytes"
 	"encoding/json"
@@ -10,7 +11,7 @@ import (
 	"strings"
 )
 
-func fetch(command Command) {
+func fetch(command Command, activeDirectory *filesystem.Directory) {
 	if command.ArgsCount() < 1 {
 		fmt.Print("\r\nfetch: missing url\r\n")
 		return
@@ -73,6 +74,8 @@ func fetch(command Command) {
 	}
 	terminal.NewLine()
 
+	output := string(body)
+
 	if isJSON {
 		var jsonBuffer bytes.Buffer
 		err := json.Indent(&jsonBuffer, []byte(string(body)), "\r", "  ")
@@ -81,9 +84,28 @@ func fetch(command Command) {
 			return
 		}
 
-		fmt.Printf("%s\r\n", jsonBuffer.String())
-		return
+		output = jsonBuffer.String()
 	}
 
-	fmt.Print(string(body))
+	if command.HasValueFlag("dest") {
+		dest, err := command.getFlagValue("dest")
+		if err != nil {
+			fmt.Printf("fetch: %s\r\n", err.Error())
+			return
+		}
+
+		if !filesystem.IsValidFilename(dest) {
+			fmt.Printf("fetch: %s is not a valid filename\r\n", dest)
+			return
+		}
+
+		name, extension, _ := filesystem.GetFilenameParts(dest)
+
+		if fileErr := (*activeDirectory).AddFile(name, extension, output); fileErr != nil {
+			fmt.Printf("fetch: failed create file: %s: %s", dest, fileErr.Error())
+			return
+		}
+	} else {
+		fmt.Printf("%s\r\n", output)
+	}
 }
