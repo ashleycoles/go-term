@@ -11,7 +11,6 @@ import (
 )
 
 // TODO: Better system for registering commands
-// TODO: Update touch to use traversal
 // TODO: Update fappend to use traversal
 // TODO: Update cat to use traversal
 // TODO: HTTP request tool similar to curl but simpler

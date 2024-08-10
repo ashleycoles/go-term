@@ -7,11 +7,26 @@ import (
 )
 
 func touch(command Command, activeDirectory **filesystem.Directory) {
-	for _, newFileName := range command.Args {
-		if name, extension, err := filesystem.GetFilenameParts(newFileName); err != nil {
+	for _, newFilePath := range command.Args {
+		target, err := (*activeDirectory).Traverse(newFilePath)
+
+		if err != nil {
+			fmt.Printf("cd: %s", err.Error())
+			terminal.NewLine()
+			return
+		}
+
+		path := filesystem.ParsePath(newFilePath)
+
+		if !path.HasFile() {
+			terminal.NewLine()
+			fmt.Printf("touch: %s is not a file", newFilePath)
+		}
+
+		if name, extension, err := filesystem.GetFilenameParts(*path.File); err != nil {
 			terminal.NewLine()
 			fmt.Printf("touch: %s", err.Error())
-		} else if err := (*activeDirectory).AddFile(name, extension, ""); err != nil {
+		} else if err := target.AddFile(name, extension, ""); err != nil {
 			terminal.NewLine()
 			fmt.Printf("touch: %s", err.Error())
 		}
