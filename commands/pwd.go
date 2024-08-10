@@ -2,9 +2,12 @@ package commands
 
 import (
 	"ash/text-game/filesystem"
+	"ash/text-game/terminal"
 	"fmt"
 )
 
 func pwd(activeDirectory **filesystem.Directory) {
-	fmt.Printf("\r\n%s\r\n", (*activeDirectory).Path())
+	terminal.NewLine()
+	fmt.Printf("%s", (*activeDirectory).Path())
+	terminal.NewLine()
 }

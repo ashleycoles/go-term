@@ -8,6 +8,9 @@ type Path struct {
 }
 
 func (path *Path) GetLastFolder() string {
+	if len(path.Folders) == 0 {
+		return ""
+	}
 	return path.Folders[len(path.Folders)-1]
 }
 

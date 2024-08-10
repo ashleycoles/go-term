@@ -13,7 +13,10 @@ func fappend(command Command, activeDirectory *filesystem.Directory) {
 	file, err := (*activeDirectory).GetFile(name)
 
 	if err != nil {
-		fmt.Printf("\r\nappend: %s\r\n", err.Error())
+		terminal.NewLine()
+		fmt.Printf("append: %s", err.Error())
+		terminal.NewLine()
+		return
 	}
 
 	file.AppendContent(content)

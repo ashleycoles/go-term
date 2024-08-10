@@ -2,20 +2,27 @@ package commands
 
 import (
 	"ash/text-game/filesystem"
+	"ash/text-game/terminal"
 	"fmt"
 )
 
 func cat(command Command, activeDirectory **filesystem.Directory) {
+	terminal.NewLine()
+
 	if command.ArgsCount() != 1 {
-		fmt.Print("\r\ncat: Must specify one file")
+		fmt.Print("cat: must specify one file")
+		terminal.NewLine()
+		return
 	}
 
 	file, err := (*activeDirectory).GetFile(command.Args[0])
 
 	if err != nil {
-		fmt.Printf("\r\n%s", err.Error())
+		fmt.Printf("cat: %s", err.Error())
+		terminal.NewLine()
 		return
 	}
 
-	fmt.Printf("\r\n%s\r\n", file.Contents)
+	fmt.Print(file.Contents)
+	terminal.NewLine()
 }

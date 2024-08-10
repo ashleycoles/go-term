@@ -9,7 +9,9 @@ import (
 func mkdir(command Command, activeDirectory **filesystem.Directory) {
 	for _, newDirName := range command.Args {
 		if _, err := (*activeDirectory).AddChild(newDirName); err != nil {
-			fmt.Printf("\r\n%s\r\n", err.Error())
+			terminal.NewLine()
+			fmt.Printf("%s", err.Error())
+			terminal.NewLine()
 			return
 		}
 	}

@@ -7,15 +7,19 @@ import (
 )
 
 func rm(command Command, activeDirectory **filesystem.Directory) {
+	terminal.NewLine()
+
 	if command.ArgsCount() < 1 {
-		fmt.Print("\r\nrm: No file or directory specified\r\n")
+		fmt.Print("rm: No file or directory specified")
+		terminal.NewLine()
 		return
 	}
 
 	for _, target := range command.Args {
 		targetDirectory, err := (*activeDirectory).Traverse(target)
 		if err != nil {
-			fmt.Printf("\r\n%s", err.Error())
+			fmt.Printf("%s", err.Error())
+			terminal.NewLine()
 			return
 		}
 
@@ -23,17 +27,22 @@ func rm(command Command, activeDirectory **filesystem.Directory) {
 		lastFolder := parsedTarget.GetLastFolder()
 
 		if lastFolder == "." || lastFolder == ".." {
-			fmt.Print("\r\nrm: \".\" and \"..\" may not be removed")
+			fmt.Print("rm: \".\" and \"..\" may not be removed")
+			terminal.NewLine()
 			return
 		}
 
 		if parsedTarget.HasFile() {
 			if err := targetDirectory.RemoveFile(*parsedTarget.File); err != nil {
-				fmt.Printf("\r\n%s", err.Error())
+				fmt.Printf("rm: %s", err.Error())
+				terminal.NewLine()
+				return
 			}
 		} else {
 			if err := targetDirectory.Parent.RemoveChild(lastFolder); err != nil {
-				fmt.Printf("\r\n%s", err.Error())
+				fmt.Printf("rm: %s", err.Error())
+				terminal.NewLine()
+				return
 			}
 		}
 	}

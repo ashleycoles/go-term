@@ -16,10 +16,13 @@ func ls(command Command, activeDirectory **filesystem.Directory) {
 			directory, err := (*activeDirectory).Traverse(arg)
 			if err != nil {
 				fmt.Printf("ls: %s", err.Error())
+				terminal.NewLine()
+				return
 			}
 
 			if argsCount > 1 {
-				fmt.Printf("\r\n%s:", directory.Name)
+				terminal.NewLine()
+				fmt.Printf("%s:", directory.Name)
 			}
 
 			displayContents(&directory)
@@ -35,10 +38,12 @@ func ls(command Command, activeDirectory **filesystem.Directory) {
 
 func displayContents(directory **filesystem.Directory) {
 	for _, dir := range (*directory).Children {
-		fmt.Printf("\r\n%s%s%s", terminal.Blue, dir.Name, terminal.Reset)
+		terminal.NewLine()
+		fmt.Printf("%s%s%s", terminal.Blue, dir.Name, terminal.Reset)
 	}
 
 	for _, file := range (*directory).Files {
-		fmt.Printf("\r\n%s", file.FullName())
+		terminal.NewLine()
+		fmt.Printf("%s", file.FullName())
 	}
 }
