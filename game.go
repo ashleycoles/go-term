@@ -1,9 +1,9 @@
 package main
 
 import (
-	"ash/text-game/commands"
-	"ash/text-game/filesystem"
-	"ash/text-game/terminal"
+	"ash/go-term/commands"
+	"ash/go-term/filesystem"
+	"ash/go-term/terminal"
 	"bufio"
 	"fmt"
 	"os"

@@ -1,7 +1,7 @@
 package terminal
 
 import (
-	"ash/text-game/filesystem"
+	"ash/go-term/filesystem"
 	"fmt"
 	"regexp"
 )

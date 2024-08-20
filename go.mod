@@ -1,4 +1,4 @@
-module ash/text-game
+module ash/go-term
 
 go 1.22.5
 

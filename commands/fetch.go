@@ -1,8 +1,8 @@
 package commands
 
 import (
-	"ash/text-game/filesystem"
-	"ash/text-game/terminal"
+	"ash/go-term/filesystem"
+	"ash/go-term/terminal"
 	"bytes"
 	"encoding/json"
 	"fmt"

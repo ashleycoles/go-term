@@ -5,7 +5,7 @@ import (
 	"strings"
 	"unicode"
 
-	"ash/text-game/filesystem"
+	"ash/go-term/filesystem"
 )
 
 type ValueFlag struct {
